@@ -81,7 +81,7 @@ let message = '';
         ticketFound();
         await browser.close();
       }
-    }, 10000);
+    }, 60000);
   } else {
     ticketFound();
     await browser.close();
