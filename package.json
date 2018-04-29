@@ -1,0 +1,15 @@
+{
+  "name": "rw_parser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Vladislav Mukhin",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "node-notifier": "^5.2.1",
+    "nodemon": "^1.17.3",
+    "puppeteer": "^1.3.0"
+  }
+}
