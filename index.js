@@ -20,8 +20,9 @@ const config = {
 
 let ticketsFound = false;
 let message = '';
+let trainFound = false;
 
-(async () => {
+const startParser = async () => {
   const browser = await puppeteer.launch({ headless: config.headless });
   const page = await browser.newPage();
   await page.setViewport({ width: 1366, height: 768, deviceScaleFactor: 2 });
@@ -49,16 +50,22 @@ let message = '';
 
     const [, , , , , , , ...headers] = await page.$$eval(config.selectors.table + ' > thead > tr > th',
       item => item.map(th => th.children.length ? th.querySelector('span').innerText.slice(0, -3) : ''));
-    const places = train.places.map((item, key) => {
-      return {
-        type: headers[key],
-        tickets: parseInt(item) || 0
-      }
-    });
+    if (train.name) {
+      const places = train.places.map((item, key) => {
+        return {
+          type: headers[key],
+          tickets: parseInt(item) || 0
+        }
+      });
 
-    ticketsFound = places.some(item => item.tickets >= config.ticketCount);
-
-    message = places.reduce((message, item) => message + `${item.type}: ${item.tickets} `, '');
+      ticketsFound = places.some(item => item.tickets >= config.ticketCount);
+      trainFound = true;
+      message = places.reduce((message, item) => message + `${item.type}: ${item.tickets} `, '');
+      console.log('check train');
+    } else {
+      console.log('Поезд не найден ' + config.trainNumber);
+      await browser.close();
+    }
   };
 
   await checkTrain();
@@ -72,7 +79,7 @@ let message = '';
     console.log(message);
   };
 
-  if (!ticketsFound) {
+  if (!ticketsFound && trainFound) {
     let delay = setInterval(async () => {
       await checkTrain();
       await page.reload();
@@ -87,4 +94,11 @@ let message = '';
     await browser.close();
   }
 
-})();
+};
+
+if (config.from.length && config.to.length && config.date && config.trainNumber.length) {
+  startParser();
+} else {
+  console.log('Введите номер поезда, станцию отправления, станцию назначения и дату.')
+}
+
